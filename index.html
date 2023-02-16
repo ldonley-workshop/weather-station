@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Weather Station</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1 id="subdomain-name"></h1>
+    <div id="chart-container">
+      <canvas id="weather-chart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      var subdomainName = window.location.hostname.split(".")[0];
+      document.getElementById("subdomain-name").textContent = subdomainName + " Weather Station";
+      var chartData = {
+        labels: getInitialLabels(),
+        datasets: [
+          {
+            label: "Temperature",
+            data: getInitialData(),
+            fill: false,
+            borderColor: "rgb(255, 99, 132)",
+            lineTension: 0.1,
+          },
+          {
+            label: "Humidity",
+            data: getInitialData(),
+            fill: false,
+            borderColor: "rgb(54, 162, 235)",
+            lineTension: 0.1,
+          },
+        ],
+      };
+
+      var chart = new Chart(document.getElementById("weather-chart"), {
+        type: "line",
+        data: chartData,
+        options: {
+          responsive: true,
+          title: {
+            display: true,
+            text: "Real-Time Weather Data",
+          },
+        },
+      });
+      setInterval(function () {
+        var temperatureData = chartData.datasets[0].data;
+        var humidityData = chartData.datasets[1].data;
+
+        temperatureData.push(getRandomNumber(60, 80));
+        humidityData.push(getRandomNumber(40, 50));
+
+        if (temperatureData.length > 5) {
+          temperatureData.shift();
+          humidityData.shift();
+        }
+
+        chartData.labels = getUpdatedLabels();
+        chart.update();
+      }, 10000);
+
+      function getRandomNumber(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+      }
+
+      function getInitialData() {
+        var data = [];
+
+        for (var i = 0; i < 5; i++) {
+          data.push(getRandomNumber(60, 80));
+        }
+
+        return data;
+      }
+
+      function getInitialLabels() {
+        var labels = [];
+
+        for (var i = 0; i < 5; i++) {
+          var time = new Date(Date.now() - i * 10 * 1000);
+          labels.push(
+            time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+          );
+        }
+
+        return labels.reverse();
+      }
+
+      function getUpdatedLabels() {
+        var labels = chartData.labels.slice();
+        var time = new Date();
+        labels.push(
+          time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+        );
+        labels.shift();
+        return labels;
+      }
+    </script>
+  </body>
+</html>
